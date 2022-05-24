@@ -1,4 +1,4 @@
-package tp2.impl.dropbox.msgs;
+package tp2.impl.dropbox;
 
 import java.util.HashMap;
 import java.util.List;
