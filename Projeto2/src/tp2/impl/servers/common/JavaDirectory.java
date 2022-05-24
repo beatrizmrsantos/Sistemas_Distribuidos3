@@ -81,6 +81,7 @@ public class JavaDirectory implements Directory {
 					info.setOwner(userId);
 					info.setFilename(filename);
 					info.setFileURL(String.format("%s/files/%s", uri, fileId));
+					info.setServer(uri);
 					files.put(fileId, file = new ExtendedFileInfo(uri, fileId, info));
 					if( uf.owned().add(fileId))
 						getFileCounts(file.uri(), true).numFiles().incrementAndGet();

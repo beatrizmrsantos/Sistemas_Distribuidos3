@@ -14,18 +14,14 @@ import tp2.impl.dropbox.CreateFolderV2Args;
 
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import tp2.api.service.java.Files;
 import tp2.api.service.java.Result;
 
 import tp2.impl.dropbox.DeleteArg;
-import tp2.impl.dropbox.GetMetadataArg;
-import tp2.impl.dropbox.GetMetadataReturn;
+import tp2.impl.dropbox.DownloadArg;
 import tp2.impl.dropbox.ListFolderArgs;
 import tp2.impl.dropbox.ListFolderContinueArgs;
 import tp2.impl.dropbox.ListFolderReturn;
@@ -51,7 +47,7 @@ public class JavaFilesDropBox implements Files {
     private static final String LIST_FOLDER_URL = "https://api.dropboxapi.com/2/files/list_folder";
     private static final String LIST_FOLDER_CONTINUE_URL = "https://api.dropboxapi.com/2/files/list_folder/continue";
 
-    private static final String GET_METADATA_URL = "https://api.dropboxapi.com/2/files/get_metadata";
+    private static final String DOWNLOAD_URL = "https://content.dropboxapi.com/2/files/download";
 
     private static final String DELETE_V2_URL = "https://api.dropboxapi.com/2/files/delete_v2";
 
@@ -70,6 +66,11 @@ public class JavaFilesDropBox implements Files {
         accessToken = new OAuth2AccessToken(accessTokenStr);
         service = new ServiceBuilder(apiKey).apiSecret(apiSecret).build(DropboxApi20.INSTANCE);
 
+        try{
+            createDirectory(ROOT);
+        } catch (Exception e){
+        }
+
     }
 
 
@@ -78,7 +79,7 @@ public class JavaFilesDropBox implements Files {
         fileId = fileId.replace( DELIMITER, "/");
 
         try{
-            byte[] data = getMetadata(ROOT + fileId );
+            byte[] data = download(ROOT + fileId );
 
             return ok( data);
 
@@ -191,15 +192,15 @@ public class JavaFilesDropBox implements Files {
         return directoryContents;
     }
 
-    public byte[] getMetadata(String uri) throws Exception{
+    public byte[] download(String uri) throws Exception{
 
-        var metadata = new OAuthRequest(Verb.POST, GET_METADATA_URL);
-        metadata.addHeader(CONTENT_TYPE_HDR, JSON_CONTENT_TYPE);
-        metadata.setPayload(json.toJson(new GetMetadataArg(uri)));
+        var download = new OAuthRequest(Verb.POST, DOWNLOAD_URL);
+        download.addHeader(CONTENT_TYPE_HDR, JSON_CONTENT_TYPE);
+        download.setPayload(json.toJson(new DownloadArg(uri)));
 
-        service.signRequest(accessToken, metadata);
+        service.signRequest(accessToken, download);
 
-        Response r = service.execute(metadata);;
+        Response r = service.execute(download);;
         if (r.getCode() != HTTP_SUCCESS)
             throw new RuntimeException();
 
