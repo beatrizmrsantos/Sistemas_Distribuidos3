@@ -3,11 +3,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>sd2122</groupId>
-	<artifactId>sd2122-tp1</artifactId>
+	<artifactId>sd2122-tp2</artifactId>
 	<version>1.0</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<authors>sol</authors>
+		<authors>57395-57597</authors>
 	</properties>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
@@ -135,30 +135,9 @@
 				<version>3.0.2</version>
 			</dependency>
 			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>31.1-jre</version>
-			</dependency>
-			<dependency>
 			    <groupId>com.sun.org.apache.xml.internal</groupId>
 			    <artifactId>resolver</artifactId>
 			    <version>20050927</version>
 			</dependency>
-			<dependency>
-				<groupId>com.google.code.gson</groupId>
-				<artifactId>gson</artifactId>
-				<version>2.9.0</version>
-			</dependency>
-			<dependency>
-				<groupId>com.github.scribejava</groupId>
-				<artifactId>scribejava-apis</artifactId>
-				<version>8.3.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.pac4j</groupId>
-				<artifactId>pac4j-oauth</artifactId>
-				<version>5.4.3</version>
-			</dependency>
 	</dependencies>
-
 </project>

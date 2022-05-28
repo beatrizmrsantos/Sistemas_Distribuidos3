@@ -3,6 +3,7 @@ package tp2.impl.servers.rest;
 import java.net.URI;
 import java.util.logging.Logger;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
@@ -10,6 +11,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import tp2.impl.discovery.Discovery;
 import tp2.impl.servers.common.AbstractServer;
+import tp2.impl.tls.InsecureHostnameVerifier;
 import util.IP;
 
 public abstract class AbstractRestServer extends AbstractServer {
@@ -27,6 +29,8 @@ public abstract class AbstractRestServer extends AbstractServer {
 			String ip = IP.hostAddress();
 			String serverURI = String.format(SERVER_BASE_URI, ip, port);
 
+			HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
+
 			ResourceConfig config = new ResourceConfig();
 
 			registerResources(config);
@@ -38,7 +42,7 @@ public abstract class AbstractRestServer extends AbstractServer {
 			Discovery.getInstance().announce(service, serverURI);
 
 		} catch (Exception e){
-
+			Log.severe(e.getMessage());
 		}
 	}
 	

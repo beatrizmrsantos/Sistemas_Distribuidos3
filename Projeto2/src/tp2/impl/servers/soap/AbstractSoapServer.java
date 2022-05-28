@@ -12,6 +12,7 @@ import com.sun.net.httpserver.HttpsServer;
 import jakarta.xml.ws.Endpoint;
 import tp2.impl.discovery.Discovery;
 import tp2.impl.servers.common.AbstractServer;
+import tp2.impl.tls.InsecureHostnameVerifier;
 import util.IP;
 
 public class AbstractSoapServer extends AbstractServer{
@@ -34,6 +35,11 @@ public class AbstractSoapServer extends AbstractServer{
 	protected void start() {
 		try {
 			var ip = IP.hostAddress();
+
+			HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
+
+			HttpsConfigurator configurator = new HttpsConfigurator(SSLContext.getDefault());
+
 
 			var server = HttpsServer.create(new InetSocketAddress(ip, port), 0);
 
