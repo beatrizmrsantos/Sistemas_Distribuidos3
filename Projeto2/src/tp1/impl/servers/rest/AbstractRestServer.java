@@ -11,6 +11,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import tp1.impl.discovery.Discovery;
 import tp1.impl.servers.common.AbstractServer;
+import tp1.impl.tls.InsecureHostnameVerifier;
 import util.IP;
 
 public abstract class AbstractRestServer extends AbstractServer {
@@ -26,8 +27,6 @@ public abstract class AbstractRestServer extends AbstractServer {
 		try {
 			String ip = IP.hostAddress();
 			String serverURI = String.format(SERVER_BASE_URI, ip, port);
-
-			HttpsURLConnection.setDefaultHostnameVerifier(new tp2.impl.tls.InsecureHostnameVerifier());
 
 			ResourceConfig config = new ResourceConfig();
 			registerResources(config);
