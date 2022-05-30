@@ -46,10 +46,6 @@ abstract class RestClient extends RetryClient {
 		this.config.property(ClientProperties.READ_TIMEOUT, READ_TIMEOUT);
 		this.config.property(ClientProperties.FOLLOW_REDIRECTS, true);
 
-		HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
-
-
-
 //		config.register(new LoggingFeature(Logger.getLogger(LoggingFeature.DEFAULT_LOGGER_NAME), Level.INFO, LoggingFeature.Verbosity.PAYLOAD_ANY, 10000));		  
 
 		this.client = ClientBuilder.newClient(config);

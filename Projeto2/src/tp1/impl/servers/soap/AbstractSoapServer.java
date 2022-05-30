@@ -16,7 +16,7 @@ import tp1.impl.tls.InsecureHostnameVerifier;
 import util.IP;
 
 public class AbstractSoapServer extends AbstractServer{
-	private static String SERVER_BASE_URI = "http://%s:%s/soap";
+	private static String SERVER_BASE_URI = "https://%s:%s/soap";
 
 	final Object implementor;
 	
@@ -41,36 +41,19 @@ public class AbstractSoapServer extends AbstractServer{
 
 			HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
 
-			System.out.println(1);
-
 			server.setHttpsConfigurator(new HttpsConfigurator(SSLContext.getDefault()));
 			server.setExecutor(Executors.newCachedThreadPool());
 
-			System.out.println(2);
 
 			var endpoint = Endpoint.create(implementor);
 
-			System.out.println(3);
-
-			System.out.println(endpoint.toString());
-			System.out.println(endpoint.getMetadata());
-			System.out.println(endpoint.isPublished());
-
 			endpoint.publish(server.createContext("/soap"));
 
-			System.out.println(4);
-
 			server.start();
-
-			System.out.println(5);
-
 
 			//Endpoint.publish(serverURI.replace(ip, INETADDR_ANY), implementor);
 
 			Discovery.getInstance().announce(service, serverURI);
-
-			System.out.println(5);
-
 
 			Log.info(String.format("%s Soap Server ready @ %s\n", service, serverURI));
 
