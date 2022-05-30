@@ -32,14 +32,13 @@ public abstract class AbstractRestServer extends AbstractServer {
 			HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
 
 			ResourceConfig config = new ResourceConfig();
-
 			registerResources(config);
 
 			JdkHttpServerFactory.createHttpServer(URI.create(serverURI.replace(ip, INETADDR_ANY)), config, SSLContext.getDefault());
 
-			Log.info(String.format("%s Server ready @ %s\n", service, serverURI));
-
 			Discovery.getInstance().announce(service, serverURI);
+
+			Log.info(String.format("%s Server ready @ %s\n", service, serverURI));
 
 		} catch (Exception e){
 			Log.severe(e.getMessage());

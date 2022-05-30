@@ -35,26 +35,41 @@ public class AbstractSoapServer extends AbstractServer{
 	protected void start() {
 		try {
 			var ip = IP.hostAddress();
-
-			HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
-
-			HttpsConfigurator configurator = new HttpsConfigurator(SSLContext.getDefault());
-
+			var serverURI = String.format(SERVER_BASE_URI, ip, port);
 
 			var server = HttpsServer.create(new InetSocketAddress(ip, port), 0);
 
-			server.setExecutor(Executors.newCachedThreadPool());
-			server.setHttpsConfigurator(new HttpsConfigurator(SSLContext.getDefault()));
+			HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
 
-			var endpoint = Endpoint.create(new SoapUsersWebService());
+			System.out.println(1);
+
+			server.setHttpsConfigurator(new HttpsConfigurator(SSLContext.getDefault()));
+			server.setExecutor(Executors.newCachedThreadPool());
+
+			System.out.println(2);
+
+			var endpoint = Endpoint.create(implementor);
+
+			System.out.println(3);
+
+			System.out.println(endpoint.toString());
+			System.out.println(endpoint.getMetadata());
+			System.out.println(endpoint.isPublished());
+
 			endpoint.publish(server.createContext("/soap"));
+
+			System.out.println(4);
 
 			server.start();
 
-			var serverURI = String.format(SERVER_BASE_URI, ip, port);
+			System.out.println(5);
+
+
 			//Endpoint.publish(serverURI.replace(ip, INETADDR_ANY), implementor);
 
 			Discovery.getInstance().announce(service, serverURI);
+
+			System.out.println(5);
 
 
 			Log.info(String.format("%s Soap Server ready @ %s\n", service, serverURI));

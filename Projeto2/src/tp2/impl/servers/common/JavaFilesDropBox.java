@@ -55,7 +55,9 @@ public class JavaFilesDropBox implements Files {
 
     private static final int HTTP_SUCCESS = 200;
     private static final String CONTENT_TYPE_HDR = "Content-Type";
+    private static final String DROPBOX_API_ARG_HDR = "Dropbox-API-Arg";
     private static final String JSON_CONTENT_TYPE = "application/json; charset=utf-8";
+    protected static final String OCTETSTREAM_CONTENT_TYPE = "application/octet-stream";
 
     private final Gson json;
     private final OAuth20Service service;
@@ -68,7 +70,9 @@ public class JavaFilesDropBox implements Files {
 
         try{
             createDirectory(ROOT);
+
         } catch (Exception e){
+            e.printStackTrace();
         }
 
     }
@@ -79,12 +83,9 @@ public class JavaFilesDropBox implements Files {
         fileId = fileId.replace( DELIMITER, "/");
 
         try{
-            byte[] data = download(ROOT + fileId );
-
-            return ok( data);
+            return download(ROOT + fileId );
 
         }catch (Exception e){
-
             return error( NOT_FOUND );
         }
 
@@ -93,28 +94,25 @@ public class JavaFilesDropBox implements Files {
     @Override
     public Result<Void> deleteFile(String fileId, String token) {
         fileId = fileId.replace( DELIMITER, "/");
-        boolean res = true;
 
         try{
-            removeFile(ROOT + fileId );
+            return removeFile(ROOT + fileId );
+
         }catch (Exception e){
-            res = false;
+            return error( NOT_FOUND );
         }
 
-        return res ? ok() : error( NOT_FOUND );
     }
 
     @Override
     public Result<Void> writeFile(String fileId, byte[] data, String token) {
         fileId = fileId.replace( DELIMITER, "/");
-        File file = new File(ROOT + fileId);
-        file.getParentFile().mkdirs();
-        IO.write( file, data);
-
 
         try{
-            write(ROOT + fileId );
+            write(ROOT + fileId, data);
+
         }catch (Exception e){
+            return error(INTERNAL_ERROR);
         }
 
         return ok();
@@ -126,6 +124,7 @@ public class JavaFilesDropBox implements Files {
 
         try{
             removeFile(ROOT + userId );
+
         }catch (Exception e){
             return error(INTERNAL_ERROR);
         }
@@ -139,20 +138,20 @@ public class JavaFilesDropBox implements Files {
 
 
 
-    private void createDirectory(String fileId) throws Exception {
-
-        String dirName = "";
+    private Result<Void> createDirectory(String root) throws Exception {
 
         var createFolder = new OAuthRequest(Verb.POST, CREATE_FOLDER_V2_URL);
         createFolder.addHeader(CONTENT_TYPE_HDR, JSON_CONTENT_TYPE);
 
-        createFolder.setPayload(json.toJson(new CreateFolderV2Args(dirName, false)));
+        createFolder.setPayload(json.toJson(new CreateFolderV2Args(root, false)));
 
         service.signRequest(accessToken, createFolder);
 
         Response r = service.execute(createFolder);
         if (r.getCode() != HTTP_SUCCESS)
-            throw new RuntimeException();
+            return error(INTERNAL_ERROR);
+
+        return ok();
     }
 
     public List<String> ListFiles(String directoryName) throws Exception {
@@ -192,17 +191,18 @@ public class JavaFilesDropBox implements Files {
         return directoryContents;
     }
 
-    public byte[] download(String uri) throws Exception{
+    public Result<byte[]> download(String uri) throws Exception{
 
         var download = new OAuthRequest(Verb.POST, DOWNLOAD_URL);
-        download.addHeader(CONTENT_TYPE_HDR, JSON_CONTENT_TYPE);
-        download.setPayload(json.toJson(new DownloadArg(uri)));
+
+        download.addHeader(CONTENT_TYPE_HDR, OCTETSTREAM_CONTENT_TYPE);
+        download.addHeader(DROPBOX_API_ARG_HDR, json.toJson(new DownloadArg(uri)));
 
         service.signRequest(accessToken, download);
 
         Response r = service.execute(download);;
         if (r.getCode() != HTTP_SUCCESS)
-            throw new RuntimeException();
+            return error(INTERNAL_ERROR);
 
         //var reply = json.fromJson(r.getBody(), GetMetadataReturn.class);
 
@@ -211,35 +211,43 @@ public class JavaFilesDropBox implements Files {
         byte[] data = new byte[in.available()];
         in.read(data);
 
-        return data;
+        //return Result.ok(IO.read(r.getStream()));
+        return Result.ok(data);
 
     }
 
-    public void removeFile(String uri) throws Exception{
+    public Result<Void> removeFile(String uri) throws Exception{
 
         var deleted = new OAuthRequest(Verb.POST, DELETE_V2_URL);
+
         deleted.addHeader(CONTENT_TYPE_HDR, JSON_CONTENT_TYPE);
-        deleted.setPayload(json.toJson(new DeleteArg(uri)));
+        deleted.addHeader(DROPBOX_API_ARG_HDR, json.toJson(new DeleteArg(uri)));
 
         service.signRequest(accessToken, deleted);
 
         Response r = service.execute(deleted);;
         if (r.getCode() != HTTP_SUCCESS)
-            throw new RuntimeException();
+            return error(INTERNAL_ERROR);
+
+        return ok();
 
     }
 
-    public void write(String uri) throws Exception{
+    public Result<Void> write(String uri, byte[] data) throws Exception{
 
         var write = new OAuthRequest(Verb.POST, UPLOAD_URL);
-        write.addHeader(CONTENT_TYPE_HDR, JSON_CONTENT_TYPE);
-        write.setPayload(json.toJson(new UploadFileArg(uri)));
+
+        write.addHeader(CONTENT_TYPE_HDR, OCTETSTREAM_CONTENT_TYPE);
+        write.addHeader(DROPBOX_API_ARG_HDR, json.toJson(new UploadFileArg(uri)));
+        write.setPayload(data);
 
         service.signRequest(accessToken, write);
 
         Response r = service.execute(write);;
         if (r.getCode() != HTTP_SUCCESS)
-            throw new RuntimeException();
+            return error(INTERNAL_ERROR);
+
+        return ok();
 
     }
 }
