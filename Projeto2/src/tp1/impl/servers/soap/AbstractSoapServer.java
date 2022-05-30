@@ -39,6 +39,8 @@ public class AbstractSoapServer extends AbstractServer{
 
 			var server = HttpsServer.create(new InetSocketAddress(ip, port), 0);
 
+			HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
+
 			System.out.println(1);
 
 			server.setHttpsConfigurator(new HttpsConfigurator(SSLContext.getDefault()));
