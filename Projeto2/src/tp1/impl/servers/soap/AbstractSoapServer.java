@@ -1,7 +1,14 @@
 package tp1.impl.servers.soap;
 
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsServer;
 import jakarta.xml.ws.Endpoint;
 import tp1.impl.discovery.Discovery;
 import tp1.impl.servers.common.AbstractServer;
@@ -25,13 +32,49 @@ public class AbstractSoapServer extends AbstractServer{
 	}
 	
 	protected void start() {
-		var ip = IP.hostAddress();
-		var serverURI = String.format(SERVER_BASE_URI, ip, port);
+		try {
+			var ip = IP.hostAddress();
+			var serverURI = String.format(SERVER_BASE_URI, ip, port);
 
-		Endpoint.publish(serverURI.replace(ip, INETADDR_ANY), implementor );
+			var server = HttpsServer.create(new InetSocketAddress(ip, port), 0);
 
-		Discovery.getInstance().announce(service, serverURI);
+			HttpsURLConnection.setDefaultHostnameVerifier(new tp2.impl.tls.InsecureHostnameVerifier());
 
-		Log.info(String.format("%s Soap Server ready @ %s\n", service, serverURI));
+			System.out.println(1);
+
+			server.setHttpsConfigurator(new HttpsConfigurator(SSLContext.getDefault()));
+			server.setExecutor(Executors.newCachedThreadPool());
+
+			System.out.println(2);
+
+			var endpoint = Endpoint.create(implementor);
+
+			System.out.println(3);
+
+			System.out.println(endpoint.toString());
+			System.out.println(endpoint.getMetadata());
+			System.out.println(endpoint.isPublished());
+
+			endpoint.publish(server.createContext("/soap"));
+
+			System.out.println(4);
+
+			server.start();
+
+			System.out.println(5);
+
+
+			//Endpoint.publish(serverURI.replace(ip, INETADDR_ANY), implementor);
+
+			Discovery.getInstance().announce(service, serverURI);
+
+			System.out.println(5);
+
+
+			Log.info(String.format("%s Soap Server ready @ %s\n", service, serverURI));
+
+		}catch (Exception e){
+
+		}
 	}
 }

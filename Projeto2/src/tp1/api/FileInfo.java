@@ -1,5 +1,7 @@
 package tp1.api;
 
+import java.net.URI;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,9 +23,12 @@ public class FileInfo {
 	 * List of user with whom the file has been shared
 	 */
 	private Set<String> sharedWith;
+
+	private Set<URI> servers;
 	
 	public FileInfo() {
 		this.sharedWith = ConcurrentHashMap.newKeySet();
+		this.servers = ConcurrentHashMap.newKeySet();
 	}
 	
 	public FileInfo(String owner, String filename, String fileURL, Set<String> sharedWith) {
@@ -31,6 +36,16 @@ public class FileInfo {
 		this.filename = filename;
 		this.fileURL = fileURL;
 		this.sharedWith = sharedWith;
+		this.servers = ConcurrentHashMap.newKeySet();
+
+	}
+
+	public void setServer(URI serverURI) {
+		this.servers.add(serverURI);
+	}
+
+	public Set<URI> getServers() {
+		return servers;
 	}
 
 	public String getOwner() {
