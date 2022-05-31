@@ -96,13 +96,21 @@ public class JavaFilesDropBox implements Files {
     public Result<Void> deleteFile(String fileId, String token) {
         fileId = fileId.replace( DELIMITER, "/");
 
-        String path = ROOT + fileId;
+        if(fileId.equalsIgnoreCase("")){
+            try{
+                return deleteAllFiles(token);
 
-        try{
-            return removeFile( path );
+            }catch (Exception e){
+                return error( INTERNAL_ERROR );
+            }
 
-        }catch (Exception e){
-            return error( INTERNAL_ERROR );
+        } else {
+            try{
+                return removeFile( ROOT + fileId );
+
+            }catch (Exception e){
+                return error( INTERNAL_ERROR );
+            }
         }
 
     }
@@ -142,7 +150,7 @@ public class JavaFilesDropBox implements Files {
     public Result<Void> deleteAllFiles(String token) {
 
         try{
-            removeFile(ROOT);
+            removeFile("/tmpDropBox");
 
         }catch (Exception e){
             return error(INTERNAL_ERROR);
