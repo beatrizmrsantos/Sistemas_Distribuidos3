@@ -69,7 +69,7 @@ public class JavaDirectory implements Directory {
         synchronized (uf) {
             var fileId = fileId(filename, userId);
             var file = files.get(fileId);
-            var info = file != null ? file.getInfo() : new FileInfo();
+            var info = file != null ? file.info() : new FileInfo();
 
             for (var uri : orderCandidateFileServers(file)) {
                 var result = FilesClients.get(uri).writeFile(fileId, data, Token.get());
@@ -81,7 +81,7 @@ public class JavaDirectory implements Directory {
 
                     files.put(fileId, file = new ExtendedFileInfo(fileId, info));
 
-                    file.addUri(String.format("%s/files/%s", uri, fileId));
+                    file.uri.add(String.format("%s/files/%s", uri, fileId));
 
                     if (uf.owned().add(fileId)) {
                         Iterator<String> servers = file.getUriIterator();
@@ -306,40 +306,11 @@ public class JavaDirectory implements Directory {
     }
 
 
-    static class ExtendedFileInfo {
+    static record ExtendedFileInfo(String fileId, FileInfo info, Set<String> uri) {
 
-        private Set<String> uri;
-        private String fileId;
-        private FileInfo info;
+		ExtendedFileInfo(String fileId, FileInfo info){
+			this(fileId, info, ConcurrentHashMap.newKeySet());
+		}
 
-        ExtendedFileInfo(String fileId, FileInfo info) {
-            this.uri = new HashSet<>();
-            this.fileId = fileId;
-            this.info = info;
-        }
-
-        public FileInfo getInfo() {
-            return info;
-        }
-
-        public String getFileId() {
-            return fileId;
-        }
-
-        public Set<String> getUri() {
-            return uri;
-        }
-
-        public void setFileId(String fileId) {
-            this.fileId = fileId;
-        }
-
-        public void addUri(String uri) {
-            this.uri.add(uri);
-        }
-
-        public Iterator<String> getUriIterator() {
-            return uri.iterator();
-        }
     }
 }
