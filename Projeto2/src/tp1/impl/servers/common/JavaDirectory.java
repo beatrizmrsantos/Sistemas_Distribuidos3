@@ -58,6 +58,8 @@ public class JavaDirectory implements Directory {
     @Override
     public Result<FileInfo> writeFile(String filename, byte[] data, String userId, String password) {
 
+        System.out.println(23);
+
         if (badParam(filename) || badParam(userId))
             return error(BAD_REQUEST);
 
@@ -76,6 +78,9 @@ public class JavaDirectory implements Directory {
             for (var uri : orderCandidateFileServers(file)) {
                 var result = FilesClients.get(uri).writeFile(fileId, data, Token.get());
 
+                System.out.println(result.isOK());
+                System.out.println(uri);
+
                 if (result.isOK()) {
                     info.setOwner(userId);
                     info.setFilename(filename);
@@ -83,7 +88,7 @@ public class JavaDirectory implements Directory {
 
                     files.put(fileId, file = new ExtendedFileInfo(fileId, info));
 
-                    file.uri.add(String.format("%s/files/%s", uri, fileId));
+                    file.uri().add(String.format("%s/files/%s", uri, fileId));
 
                     if (uf.owned().add(fileId)) {
 

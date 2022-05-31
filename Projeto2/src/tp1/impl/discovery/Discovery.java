@@ -97,6 +97,8 @@ public class Discovery {
 						
 						var name = tokens[0];
 						var uri = URI.create( tokens[1]);
+
+						System.out.println( "discovery " + uri);
 						
 						discoveries.computeIfAbsent(name, (k) -> ConcurrentHashMap.newKeySet()).add( uri );
 					}
