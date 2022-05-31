@@ -87,7 +87,7 @@ public class JavaFilesDropBox implements Files {
             return download(ROOT + fileId );
 
         }catch (Exception e){
-            return error( NOT_FOUND );
+            return error( INTERNAL_ERROR );
         }
 
     }
@@ -96,11 +96,13 @@ public class JavaFilesDropBox implements Files {
     public Result<Void> deleteFile(String fileId, String token) {
         fileId = fileId.replace( DELIMITER, "/");
 
+        String path = ROOT + fileId;
+
         try{
-            return removeFile(ROOT + fileId );
+            return removeFile( path );
 
         }catch (Exception e){
-            return error( NOT_FOUND );
+            return error( INTERNAL_ERROR );
         }
 
     }
@@ -137,6 +139,18 @@ public class JavaFilesDropBox implements Files {
         return userId + JavaFiles.DELIMITER + filename;
     }
 
+    public Result<Void> deleteAllFiles(String token) {
+
+        try{
+            removeFile(ROOT);
+
+        }catch (Exception e){
+            return error(INTERNAL_ERROR);
+        }
+
+        return ok();
+    }
+
 
 
     private Result<Void> createDirectory(String root) throws Exception {
@@ -155,6 +169,7 @@ public class JavaFilesDropBox implements Files {
         return ok();
     }
 
+    /*
     public List<String> ListFiles(String directoryName) throws Exception {
         var directoryContents = new ArrayList<String>();
 
@@ -190,7 +205,7 @@ public class JavaFilesDropBox implements Files {
         }
 
         return directoryContents;
-    }
+    }*/
 
     public Result<byte[]> download(String uri) throws Exception{
 
@@ -202,18 +217,11 @@ public class JavaFilesDropBox implements Files {
         service.signRequest(accessToken, download);
 
         Response r = service.execute(download);;
-        if (r.getCode() != HTTP_SUCCESS)
-            return error(INTERNAL_ERROR);
+        if (r.getCode() != HTTP_SUCCESS){
+            return error(NOT_FOUND);
+        }
 
-        //var reply = json.fromJson(r.getBody(), GetMetadataReturn.class);
-
-        var in = r.getStream();
-
-        byte[] data = new byte[in.available()];
-        in.read(data);
-
-        //return Result.ok(IO.read(r.getStream()));
-        return Result.ok(data);
+        return Result.ok(r.getStream().readAllBytes());
 
     }
 
@@ -228,7 +236,7 @@ public class JavaFilesDropBox implements Files {
 
         Response r = service.execute(deleted);;
         if (r.getCode() != HTTP_SUCCESS)
-            return error(INTERNAL_ERROR);
+            return error(NOT_FOUND);
 
         return ok();
 

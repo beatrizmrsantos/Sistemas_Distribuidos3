@@ -2,6 +2,7 @@ package tp1.impl.servers.rest;
 
 import java.util.logging.Logger;
 
+import tp1.api.service.java.Result;
 import tp1.impl.servers.rest.RestResource;
 import tp1.api.service.java.Files;
 import tp1.api.service.rest.RestFiles;
@@ -13,8 +14,12 @@ public class FilesDropBoxResources extends RestResource implements RestFiles {
 
     final Files impl;
 
-    public FilesDropBoxResources() {
+    public FilesDropBoxResources(String flag) {
         impl = new JavaFilesDropBox();
+
+        if(flag.equalsIgnoreCase("true")){
+
+        }
     }
 
     @Override
@@ -44,4 +49,5 @@ public class FilesDropBoxResources extends RestResource implements RestFiles {
 
         super.resultOrThrow( impl.deleteUserFiles(userId, token));
     }
+
 }

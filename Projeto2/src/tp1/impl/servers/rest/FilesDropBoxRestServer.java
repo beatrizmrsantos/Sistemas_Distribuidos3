@@ -13,9 +13,11 @@ import util.Debug;
 import util.Token;
 
 public class FilesDropBoxRestServer extends AbstractRestServer {
-    public static final int PORT = 5678;
+    public static final int PORT = 6789;
 
     private static Logger Log = Logger.getLogger(FilesDropBoxRestServer.class.getName());
+
+    public static String flag;
 
 
     FilesDropBoxRestServer() {
@@ -24,17 +26,20 @@ public class FilesDropBoxRestServer extends AbstractRestServer {
 
     @Override
     void registerResources(ResourceConfig config) {
-        config.register( FilesDropBoxResources.class );
+        FilesDropBoxResources f = new FilesDropBoxResources(flag);
+        config.register( f );
         config.register( GenericExceptionMapper.class );
 //		config.register( CustomLoggingFilter.class);
     }
 
     public static void main(String[] args) throws Exception {
 
+        flag = args[0];
+
         Debug.setLogLevel( Level.INFO, Debug.TP1);
 
         Token.set( args.length == 0 ? "" : args[0] );
 
-        new FilesRestServer().start();
+        new FilesDropBoxRestServer().start();
     }
 }
