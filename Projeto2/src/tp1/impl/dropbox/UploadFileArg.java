@@ -1,16 +1,6 @@
 package tp1.impl.dropbox;
 
-public class UploadFileArg {
+public record UploadFileArg (String path, String mode, boolean autorename, boolean mute, boolean strict_conflict) {
 
-    final String path;
-    final String mode;
-    final boolean autorename;
-    final boolean mute;
-
-    public UploadFileArg(String path) {
-        this.path = path;
-        this.mode = "overwrite";
-        this.autorename = false;
-        this.mute = false;
-    }
+    public UploadFileArg(String path) { this(path, "overwrite", false, false, false);   }
 }

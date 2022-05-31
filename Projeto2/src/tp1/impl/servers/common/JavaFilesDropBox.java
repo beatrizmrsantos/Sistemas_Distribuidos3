@@ -37,7 +37,7 @@ import static tp1.api.service.java.Result.ok;
 public class JavaFilesDropBox implements Files {
 
     static final String DELIMITER = "$$$";
-    private static final String ROOT = "/tmpDropBox";
+    private static final String ROOT = "/tmpDropBox/";
 
     private static final String apiKey = "ki9t63870k4ifvy";
     private static final String apiSecret = "j3nbd4eccpdvlj8";
@@ -70,7 +70,7 @@ public class JavaFilesDropBox implements Files {
         service = new ServiceBuilder(apiKey).apiSecret(apiSecret).build(DropboxApi20.INSTANCE);
 
         try{
-            createDirectory(ROOT);
+            createDirectory("/tmpDropBox");
 
         } catch (Exception e){
             e.printStackTrace();
@@ -96,16 +96,12 @@ public class JavaFilesDropBox implements Files {
     public Result<Void> deleteFile(String fileId, String token) {
         String path = "/tmpDropBox";
 
-        System.out.println(1);
-
         if(!fileId.equalsIgnoreCase("")) {
-            System.out.println(-1);
             fileId = fileId.replace( DELIMITER, "/");
             path = ROOT + fileId;
         }
 
         try {
-            System.out.println(2);
             return removeFile(path);
         } catch (Exception e) {
             return error(INTERNAL_ERROR);
@@ -222,22 +218,17 @@ public class JavaFilesDropBox implements Files {
 
     public Result<Void> removeFile(String uri) throws Exception{
 
-        System.out.println(uri);
-
         var deleted = new OAuthRequest(Verb.POST, DELETE_V2_URL);
 
         deleted.addHeader(CONTENT_TYPE_HDR, JSON_CONTENT_TYPE);
-        deleted.addHeader(DROPBOX_API_ARG_HDR, json.toJson(new DeleteArg(uri)));
+        deleted.setPayload(json.toJson(new DeleteArg(uri)));
+       // deleted.addHeader(DROPBOX_API_ARG_HDR, json.toJson(new DeleteArg(uri)));
 
         service.signRequest(accessToken, deleted);
-        System.out.println(2);
 
         Response r = service.execute(deleted);
 
-        System.out.println(r.getCode());
-
         if (r.getCode() != HTTP_SUCCESS) {
-            System.out.println(-5);
             return error(NOT_FOUND);
         }
         return ok();

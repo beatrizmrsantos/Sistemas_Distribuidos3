@@ -36,6 +36,8 @@ public class FilesDropBoxRestServer extends AbstractRestServer {
 
         flag = args[0];
 
+        System.out.println("servidor : " +flag);
+
         Debug.setLogLevel( Level.INFO, Debug.TP1);
 
         Token.set( args.length == 0 ? "" : args[1] );
