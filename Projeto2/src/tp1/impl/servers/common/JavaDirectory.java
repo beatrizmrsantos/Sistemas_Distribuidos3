@@ -71,6 +71,8 @@ public class JavaDirectory implements Directory {
             var file = files.get(fileId);
             var info = file != null ? file.info() : new FileInfo();
 
+			var counter = 0;
+
             for (var uri : orderCandidateFileServers(file)) {
                 var result = FilesClients.get(uri).writeFile(fileId, data, Token.get());
 
@@ -84,13 +86,18 @@ public class JavaDirectory implements Directory {
                     file.uri.add(String.format("%s/files/%s", uri, fileId));
 
                     if (uf.owned().add(fileId)) {
-                        Iterator<String> servers = file.getUriIterator();
-                        while (servers.hasNext()) {
-                            getFileCounts(URI.create(servers.next()), true).numFiles().incrementAndGet();
-                        }
+
+						for(var u: file.uri()){
+							getFileCounts(URI.create(u), true).numFiles().incrementAndGet();
+						}
+
                     }
 
-                    return ok(file.getInfo());
+					counter++;
+
+					if(counter == 2 || FilesClients.all().size() < 2){
+						return ok(file.info());
+					}
 
                 } else {
                     Log.info(String.format("Files.writeFile(...) to %s failed with: %s \n", uri, result));
@@ -123,10 +130,15 @@ public class JavaDirectory implements Directory {
 
             executor.execute(() -> {
                 this.removeSharesOfFile(info);
-                FilesClients.get(file.uri()).deleteFile(fileId, password);
+
+				for(var uri: file.uri()){
+					FilesClients.get(uri).deleteFile(fileId, password);
+
+					getFileCounts(URI.create(uri), false).numFiles().decrementAndGet();
+				}
+
             });
 
-            getFileCounts(info.uri(), false).numFiles().decrementAndGet();
         }
         return ok();
     }
@@ -149,7 +161,7 @@ public class JavaDirectory implements Directory {
         var uf = userFiles.computeIfAbsent(userIdShare, (k) -> new UserFiles());
         synchronized (uf) {
             uf.shared().add(fileId);
-            file.getInfo().getSharedWith().add(userIdShare);
+            file.info().getSharedWith().add(userIdShare);
         }
 
         return ok();
@@ -173,7 +185,7 @@ public class JavaDirectory implements Directory {
         var uf = userFiles.computeIfAbsent(userIdShare, (k) -> new UserFiles());
         synchronized (uf) {
             uf.shared().remove(fileId);
-            file.getInfo().getSharedWith().remove(userIdShare);
+            file.info().getSharedWith().remove(userIdShare);
         }
 
         return ok();
@@ -193,10 +205,21 @@ public class JavaDirectory implements Directory {
         if (!user.isOK())
             return error(user.error());
 
-        if (!file.getInfo().hasAccess(accUserId))
+        if (!file.info().hasAccess(accUserId))
             return error(FORBIDDEN);
 
-        return redirect(file.getUriIterator().next());
+		//tenta ir buscar o file em varios servidores
+		Result<byte[]> result = error(BAD_REQUEST);
+
+		for(var uri: file.uri()){
+			result = redirect(uri);
+
+			if(result.isOK()) break;
+		}
+
+
+		return result;
+
     }
 
     @Override
@@ -210,7 +233,7 @@ public class JavaDirectory implements Directory {
 
         var uf = userFiles.getOrDefault(userId, new UserFiles());
         synchronized (uf) {
-            var infos = Stream.concat(uf.owned().stream(), uf.shared().stream()).map(f -> files.get(f).getInfo())
+            var infos = Stream.concat(uf.owned().stream(), uf.shared().stream()).map(f -> files.get(f).info())
                     .collect(Collectors.toSet());
 
             return ok(new ArrayList<>(infos));
@@ -243,14 +266,18 @@ public class JavaDirectory implements Directory {
             for (var id : fileIds.owned()) {
                 var file = files.remove(id);
                 removeSharesOfFile(file);
-                getFileCounts(file.uri(), false).numFiles().decrementAndGet();
+
+				for(var uri: file.uri()){
+					getFileCounts(URI.create(uri), false).numFiles().decrementAndGet();
+				}
+
             }
         return ok();
     }
 
     private void removeSharesOfFile(ExtendedFileInfo file) {
-        for (var userId : file.getInfo().getSharedWith())
-            userFiles.getOrDefault(userId, new UserFiles()).shared().remove(file.getFileId());
+        for (var userId : file.info().getSharedWith())
+            userFiles.getOrDefault(userId, new UserFiles()).shared().remove(file.fileId());
     }
 
 
@@ -258,8 +285,11 @@ public class JavaDirectory implements Directory {
         int MAX_SIZE = 3;
         Queue<URI> result = new ArrayDeque<>();
 
-        if (file != null)
-            result.add(file.uri());
+        if (file != null){
+			for(var uri: file.uri()){
+				result.add(URI.create(uri));
+			}
+		}
 
         FilesClients.all()
                 .stream()
