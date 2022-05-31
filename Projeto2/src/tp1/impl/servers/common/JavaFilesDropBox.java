@@ -94,9 +94,9 @@ public class JavaFilesDropBox implements Files {
 
     @Override
     public Result<Void> deleteFile(String fileId, String token) {
-        String path = fileId;
+        String path = "/tmpDropBox";
 
-        if(!fileId.equalsIgnoreCase("/tmpDropBox")) {
+        if(!fileId.equalsIgnoreCase("")) {
             fileId = fileId.replace( DELIMITER, "/");
             path = ROOT + fileId;
         }

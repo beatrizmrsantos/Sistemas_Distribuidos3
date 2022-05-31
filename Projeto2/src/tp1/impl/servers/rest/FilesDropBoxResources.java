@@ -18,7 +18,7 @@ public class FilesDropBoxResources extends RestResource implements RestFiles {
         impl = new JavaFilesDropBox();
 
         if(flag.equalsIgnoreCase("true")){
-            deleteFile("/tmpDropBox", "");
+            deleteFile("", "");
         }
     }
 
