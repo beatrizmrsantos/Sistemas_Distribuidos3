@@ -78,6 +78,12 @@ public class JavaDirectory implements Directory {
             var counter = 0;
 
             for (var uri : orderCandidateFileServers(file)) {
+
+                //se for update do file e nao write
+                if (file.uri().size() == 2) {
+                    uri =  URI.create(file.uri().stream().toList().get(counter).replace(String.format("/files/%s$$$%s", userId, filename), ""));
+                }
+                
                 var result = FilesClients.get(uri).writeFile(fileId, data, Token.get());
 
                 if (result.isOK()) {
