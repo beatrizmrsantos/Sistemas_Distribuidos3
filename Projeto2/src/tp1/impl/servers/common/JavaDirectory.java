@@ -73,9 +73,9 @@ public class JavaDirectory implements Directory {
             var filemap = files.get(fileId);
             var info = filemap != null ? filemap.info() : new FileInfo();
 
-            var file = filemap!=null ? filemap : new ExtendedFileInfo(fileId, info);
+            var file = filemap != null ? filemap : new ExtendedFileInfo(fileId, info);
 
-			var counter = 0;
+            var counter = 0;
 
             for (var uri : orderCandidateFileServers(file)) {
                 var result = FilesClients.get(uri).writeFile(fileId, data, Token.get());
@@ -85,7 +85,7 @@ public class JavaDirectory implements Directory {
                     info.setFilename(filename);
                     info.setFileURL(String.format("%s/files/%s", uri, fileId));
 
-                    files.put(fileId,file);
+                    files.put(fileId, file);
 
                     file.uri().add(String.format("%s/files/%s", uri, fileId));
 
@@ -93,11 +93,11 @@ public class JavaDirectory implements Directory {
                         getFileCounts(uri, true).numFiles().incrementAndGet();
                     }
 
-					counter++;
+                    counter++;
 
-					if(counter == 2 || FilesClients.all().size() < 2){
-						return ok(file.info());
-					}
+                    if (counter == 2 || FilesClients.all().size() < 2) {
+                        return ok(file.info());
+                    }
 
                 } else {
                     Log.info(String.format("Files.writeFile(...) to %s failed with: %s \n", uri, result));
@@ -131,11 +131,11 @@ public class JavaDirectory implements Directory {
             executor.execute(() -> {
                 this.removeSharesOfFile(info);
 
-				for(var uri: file.uri()){
-					FilesClients.get(uri).deleteFile(fileId, password);
+                for (var uri : file.uri()) {
+                    FilesClients.get(uri).deleteFile(fileId, password);
 
-					getFileCounts(URI.create(uri), false).numFiles().decrementAndGet();
-				}
+                    getFileCounts(URI.create(uri), false).numFiles().decrementAndGet();
+                }
 
             });
 
@@ -208,30 +208,22 @@ public class JavaDirectory implements Directory {
         if (!file.info().hasAccess(accUserId))
             return error(FORBIDDEN);
 
-        //tenta ir buscar o file em varios servidores
-        Result<byte[]> res = error(BAD_REQUEST);
 
-        for (var uri : file.uri()) {
-            System.out.println(file.uri.size());
-            System.out.println(uri);
+        System.out.println(file.uri.size());
 
-            res = redirect(uri);
-            if (res.error() == ErrorCode.REDIRECT) {
-                String location = res.errorValue();
-                if (location.contains(REST)){
-                    break;
-                }
-            } else {
-                if(res.isOK()){
+        var uris = file.info.getFileURL();
+
+        if (!redirect(uris).isOK()) {
+
+            for (var uri : file.uri()) {
+                if (!uris.equalsIgnoreCase(uri)) {
+                    file.info.setFileURL(uri);
                     break;
                 }
             }
-
-            System.out.println(res);
-
         }
 
-        return res;
+        return redirect(uris);
     }
 
     @Override
@@ -279,9 +271,9 @@ public class JavaDirectory implements Directory {
                 var file = files.remove(id);
                 removeSharesOfFile(file);
 
-				for(var uri: file.uri()){
-					getFileCounts(URI.create(uri), false).numFiles().decrementAndGet();
-				}
+                for (var uri : file.uri()) {
+                    getFileCounts(URI.create(uri), false).numFiles().decrementAndGet();
+                }
 
             }
         return ok();
@@ -297,11 +289,11 @@ public class JavaDirectory implements Directory {
         int MAX_SIZE = 3;
         Queue<URI> result = new ArrayDeque<>();
 
-        if (file != null){
-			for(var uri: file.uri()){
-				result.add(URI.create(uri));
-			}
-		}
+        if (file != null) {
+            for (var uri : file.uri()) {
+                result.add(URI.create(uri));
+            }
+        }
 
         FilesClients.all()
                 .stream()
@@ -350,9 +342,9 @@ public class JavaDirectory implements Directory {
 
     static record ExtendedFileInfo(String fileId, FileInfo info, Set<String> uri) {
 
-		ExtendedFileInfo(String fileId, FileInfo info){
-			this(fileId, info, ConcurrentHashMap.newKeySet());
-		}
+        ExtendedFileInfo(String fileId, FileInfo info) {
+            this(fileId, info, ConcurrentHashMap.newKeySet());
+        }
 
     }
 }
