@@ -22,6 +22,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import tp1.api.FileInfo;
 import tp1.api.User;
 import tp1.api.service.java.Directory;
@@ -32,6 +34,8 @@ import util.Token;
 public class JavaDirectory implements Directory {
 
     static final long USER_CACHE_EXPIRATION = 3000;
+
+    private static final String REST = "/rest/";
 
     final LoadingCache<UserInfo, Result<User>> users = CacheBuilder.newBuilder()
             .expireAfterWrite(Duration.ofMillis(USER_CACHE_EXPIRATION))
@@ -204,20 +208,30 @@ public class JavaDirectory implements Directory {
         if (!file.info().hasAccess(accUserId))
             return error(FORBIDDEN);
 
-		//tenta ir buscar o file em varios servidores
-		Result<byte[]> result = error(BAD_REQUEST);
+        //tenta ir buscar o file em varios servidores
+        Result<byte[]> res = error(BAD_REQUEST);
 
-		for(var uri: file.uri()){
+        for (var uri : file.uri()) {
             System.out.println(file.uri.size());
             System.out.println(uri);
-			result = redirect(uri);
-            System.out.println(result);
-			if(result.isOK()) break;
-		}
 
+            res = redirect(uri);
+            if (res.error() == ErrorCode.REDIRECT) {
+                String location = res.errorValue();
+                if (location.contains(REST)){
+                    break;
+                }
+            } else {
+                if(res.isOK()){
+                    break;
+                }
+            }
 
-		return result;
+            System.out.println(res);
 
+        }
+
+        return res;
     }
 
     @Override
