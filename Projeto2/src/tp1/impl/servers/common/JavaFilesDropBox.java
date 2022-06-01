@@ -41,7 +41,7 @@ public class JavaFilesDropBox implements Files {
 
     private static final String apiKey = "ki9t63870k4ifvy";
     private static final String apiSecret = "j3nbd4eccpdvlj8";
-    private static final String accessTokenStr = "sl.BIpj1Gk0iwaqcGB-KfSta31YmIwTl7jdcrzdnjIBG3FIK9SVogoSel_LNPFbrbVyNXYwiwt27ib9tyJXZl_g-63KOfLt-sbH1sVAPDaLYq0AmnAXO0KXbrFqEk42gBGXg2QzBzf-";
+    private static final String accessTokenStr = "sl.BIsl1p1N9hyCe1r880ebPps_vvojhzYiuQVMccmygbwuLbMjtg5Q1mnhhXu6HCe3z4QLzEJk_WZrBBInlXnjaEJdVmWh3y1u7V8I-GF_DHaEWERrFS2Tx5YZuDtuT8JnDO0FZu7L";
 
     private static final String CREATE_FOLDER_V2_URL = "https://api.dropboxapi.com/2/files/create_folder_v2";
 
@@ -70,7 +70,6 @@ public class JavaFilesDropBox implements Files {
         service = new ServiceBuilder(apiKey).apiSecret(apiSecret).build(DropboxApi20.INSTANCE);
 
         try{
-            System.out.println("limpa");
             createDirectory("/tmpDropBox");
 
         } catch (Exception e){
@@ -228,8 +227,6 @@ public class JavaFilesDropBox implements Files {
         service.signRequest(accessToken, deleted);
 
         Response r = service.execute(deleted);
-
-        System.out.println(r.getCode());
 
         if (r.getCode() != HTTP_SUCCESS) {
             return error(NOT_FOUND);

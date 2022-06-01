@@ -1,11 +1,9 @@
 package tp1.impl.servers.common;
 
+import static tp1.api.service.java.Result.ErrorCode.*;
 import static tp1.api.service.java.Result.error;
 import static tp1.api.service.java.Result.ok;
 import static tp1.api.service.java.Result.redirect;
-import static tp1.api.service.java.Result.ErrorCode.BAD_REQUEST;
-import static tp1.api.service.java.Result.ErrorCode.FORBIDDEN;
-import static tp1.api.service.java.Result.ErrorCode.NOT_FOUND;
 import static tp1.impl.clients.Clients.FilesClients;
 import static tp1.impl.clients.Clients.UsersClients;
 
@@ -68,8 +66,10 @@ public class JavaDirectory implements Directory {
         var uf = userFiles.computeIfAbsent(userId, (k) -> new UserFiles());
         synchronized (uf) {
             var fileId = fileId(filename, userId);
-            var file = files.get(fileId);
-            var info = file != null ? file.info() : new FileInfo();
+            var filemap = files.get(fileId);
+            var info = filemap != null ? filemap.info() : new FileInfo();
+
+            var file = filemap!=null ? filemap : new ExtendedFileInfo(fileId, info);
 
 			var counter = 0;
 
@@ -81,16 +81,12 @@ public class JavaDirectory implements Directory {
                     info.setFilename(filename);
                     info.setFileURL(String.format("%s/files/%s", uri, fileId));
 
-                    files.put(fileId, file = new ExtendedFileInfo(fileId, info));
+                    files.put(fileId,file);
 
                     file.uri().add(String.format("%s/files/%s", uri, fileId));
 
-                    if (uf.owned().add(fileId)) {
-
-						for(var u: file.uri()){
-							getFileCounts(URI.create(u), true).numFiles().incrementAndGet();
-						}
-
+                    if (uf.owned().add(fileId) || !file.uri().contains(uri)) {
+                        getFileCounts(uri, true).numFiles().incrementAndGet();
                     }
 
 					counter++;
@@ -212,8 +208,10 @@ public class JavaDirectory implements Directory {
 		Result<byte[]> result = error(BAD_REQUEST);
 
 		for(var uri: file.uri()){
+            System.out.println(file.uri.size());
+            System.out.println(uri);
 			result = redirect(uri);
-
+            System.out.println(result);
 			if(result.isOK()) break;
 		}
 

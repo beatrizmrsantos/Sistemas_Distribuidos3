@@ -86,6 +86,7 @@ public class Discovery {
 		try (var ms = new MulticastSocket(DISCOVERY_ADDR.getPort())) {
 			joinGroupInAllInterfaces(ms);
 			for(;;) {
+				//ms.setSoTimeout(DISCOVERY_TIMEOUT);
 				try {
 					pkt.setLength(MAX_DATAGRAM_SIZE);
 					ms.receive(pkt);
