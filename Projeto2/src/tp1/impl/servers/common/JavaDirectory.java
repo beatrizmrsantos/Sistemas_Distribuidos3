@@ -208,20 +208,15 @@ public class JavaDirectory implements Directory {
         if (!file.info().hasAccess(accUserId))
             return error(FORBIDDEN);
 
-
-        System.out.println(file.uri.size());
-
         var uris = file.info.getFileURL();
 
-        if (!redirect(uris).isOK()) {
-
-            for (var uri : file.uri()) {
-                if (!uris.equalsIgnoreCase(uri)) {
-                    file.info.setFileURL(uri);
-                    break;
-                }
+        for (var uri : file.uri()) {
+            if (!uris.equalsIgnoreCase(uri)) {
+                file.info.setFileURL(uri);
+                break;
             }
         }
+
 
         return redirect(uris);
     }
