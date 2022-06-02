@@ -24,11 +24,14 @@ import com.google.common.cache.LoadingCache;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import tp1.api.FileInfo;
 import tp1.api.User;
 import tp1.api.service.java.Directory;
 import tp1.api.service.java.Result;
 import tp1.api.service.java.Result.ErrorCode;
+import tp1.impl.kafka.KafkaPublisher;
+import tp1.impl.kafka.sync.SyncPoint;
 import util.Token;
 
 public class JavaDirectory implements Directory {
@@ -56,6 +59,16 @@ public class JavaDirectory implements Directory {
     final Map<String, ExtendedFileInfo> files = new ConcurrentHashMap<>();
     final Map<String, UserFiles> userFiles = new ConcurrentHashMap<>();
     final Map<URI, FileCounts> fileCounts = new ConcurrentHashMap<>();
+
+    final KafkaPublisher publisher;
+
+    static final String TOPIC = "delete";
+    //static final String KAFKA_BROKERS = "localhost:9092"; // For testing locally
+    static final String KAFKA_BROKERS = "kafka:9092";
+
+    public JavaDirectory() {
+        this.publisher = KafkaPublisher.createPublisher(KAFKA_BROKERS);
+    }
 
     @Override
     public Result<FileInfo> writeFile(String filename, byte[] data, String userId, String password) {
@@ -138,14 +151,21 @@ public class JavaDirectory implements Directory {
                 this.removeSharesOfFile(info);
 
                 for (var uri : file.uri()) {
-                    FilesClients.get(uri).deleteFile(fileId, password);
-
+                    //FilesClients.get(uri).deleteFile(fileId, password);
                     getFileCounts(URI.create(uri), false).numFiles().decrementAndGet();
                 }
 
             });
 
         }
+
+        long offset = publisher.publish(TOPIC, fileId);
+        if (offset < 0)
+            return error(INTERNAL_ERROR);
+
+        SyncPoint sp = SyncPoint.getInstance();
+        sp.waitForResult(offset);
+
         return ok();
     }
 
