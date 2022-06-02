@@ -73,8 +73,6 @@ public class JavaDirectory implements Directory {
     @Override
     public Result<FileInfo> writeFile(String filename, byte[] data, String userId, String password) {
 
-        System.out.println(1);
-
         if (badParam(filename) || badParam(userId))
             return error(BAD_REQUEST);
 

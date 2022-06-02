@@ -16,7 +16,6 @@ import tp1.api.service.java.Files;
 import tp1.api.service.java.Result;
 import tp1.impl.kafka.KafkaSubscriber;
 import tp1.impl.kafka.RecordProcessor;
-import tp1.impl.kafka.sync.SyncPoint;
 import util.IO;
 
 public class JavaFiles implements Files {
@@ -41,13 +40,8 @@ public class JavaFiles implements Files {
 			public void onReceive(ConsumerRecord<String, String> r) {
 				String fileId = r.value();
 
-				System.out.println(5);
-
-				Result res = ok();
-
 				if(getFile(fileId, "").isOK()){
-					System.out.println(-5);
-					res = deleteFile(fileId, "");
+					deleteFile(fileId, "");
 				}
 			}
 		});
