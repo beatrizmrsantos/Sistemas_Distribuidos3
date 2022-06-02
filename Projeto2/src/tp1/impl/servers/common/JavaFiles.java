@@ -35,15 +35,18 @@ public class JavaFiles implements Files {
 		KafkaSubscriber subscriber = KafkaSubscriber.createSubscriber(KAFKA_BROKERS, List.of(TOPIC),
 				FROM_BEGINNING);
 
-		subscriber.start(true, new RecordProcessor() {
+		subscriber.start(false, new RecordProcessor() {
 
 			@Override
 			public void onReceive(ConsumerRecord<String, String> r) {
 				String fileId = r.value();
 
+				System.out.println(5);
+
 				Result res = ok();
 
 				if(getFile(fileId, "").isOK()){
+					System.out.println(-5);
 					res = deleteFile(fileId, "");
 				}
 			}
