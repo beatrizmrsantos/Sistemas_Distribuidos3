@@ -43,11 +43,9 @@ public class JavaFiles implements Files {
 
 				Result res = ok();
 
-				SyncPoint sp = SyncPoint.getInstance();
 				if(getFile(fileId, "").isOK()){
 					res = deleteFile(fileId, "");
 				}
-				sp.setResult(r.offset(), res);
 			}
 		});
 	}
