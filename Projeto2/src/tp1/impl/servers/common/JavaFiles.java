@@ -16,7 +16,6 @@ import tp1.api.service.java.Files;
 import tp1.api.service.java.Result;
 import tp1.impl.kafka.KafkaSubscriber;
 import tp1.impl.kafka.RecordProcessor;
-import tp1.impl.kafka.examples.KafkaSender;
 import tp1.impl.kafka.sync.SyncPoint;
 import util.IO;
 
@@ -36,7 +35,7 @@ public class JavaFiles implements Files {
 		KafkaSubscriber subscriber = KafkaSubscriber.createSubscriber(KAFKA_BROKERS, List.of(TOPIC),
 				FROM_BEGINNING);
 
-		subscriber.start(false, new RecordProcessor() {
+		subscriber.start(true, new RecordProcessor() {
 
 			@Override
 			public void onReceive(ConsumerRecord<String, String> r) {
