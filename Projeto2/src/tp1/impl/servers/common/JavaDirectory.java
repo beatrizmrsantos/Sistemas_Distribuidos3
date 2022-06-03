@@ -315,7 +315,7 @@ public class JavaDirectory implements Directory {
 
         if (file != null) {
             for (var uri : file.uri()) {
-                result.add(URI.create(uri));
+                result.add(URI.create(uri.replace(String.format("/files/%s", file.fileId()), "")));
             }
         }
 
