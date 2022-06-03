@@ -41,7 +41,7 @@ public class JavaFilesDropBox implements Files {
 
     private static final String apiKey = "ki9t63870k4ifvy";
     private static final String apiSecret = "j3nbd4eccpdvlj8";
-    private static final String accessTokenStr = "sl.BIwW0wVHLPvgXSygIj24HT67RvRQ35irzQMVm98fpQdte2ll6t268hUiizzoSrhxjS-4c2GyD0eVdAkJLuDBF2EFoVe2Tbohi_cZg48ItascVJAWINAXWm6XvaQ9dPgRDdKeBN7g";
+    private static final String accessTokenStr = "sl.BI1IAZXCPQX41nZxabQgoz1HMFlY7nWYG9xWL0Rk78O_HF7VUjIBKnLp0fsfVBRRHVY4n98l-pzifR6IEyXOgEl3I3Niy0mGDd6QkCH0afjpvZMNJFvDelq8JSZIay7GMi3pUnei";
 
     private static final String CREATE_FOLDER_V2_URL = "https://api.dropboxapi.com/2/files/create_folder_v2";
 
