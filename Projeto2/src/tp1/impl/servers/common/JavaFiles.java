@@ -38,15 +38,18 @@ public class JavaFiles implements Files {
 
 			@Override
 			public void onReceive(ConsumerRecord<String, String> r) {
-				String fileId = r.value();
+				String value = r.value();
 
-				if(getFile(fileId, "").isOK()){
-					deleteFile(fileId, "");
+				if(r.key().equalsIgnoreCase("deleteUserFiles")) {
+						deleteUserFiles(value, "");
+				}else{
+					if(getFile(value, "").isOK()){
+						deleteFile(value, "");
+					}
 				}
 			}
 		});
 	}
-
 			@Override
 	public Result<byte[]> getFile(String fileId, String token) {
 		fileId = fileId.replace( DELIMITER, "/");

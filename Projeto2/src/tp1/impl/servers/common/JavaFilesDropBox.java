@@ -1,5 +1,6 @@
 package tp1.impl.servers.common;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.pac4j.scribe.builder.api.DropboxApi20;
 
 import com.github.scribejava.core.builder.ServiceBuilder;
@@ -10,6 +11,8 @@ import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
 import com.google.gson.Gson;
 
+import tp1.impl.kafka.KafkaSubscriber;
+import tp1.impl.kafka.RecordProcessor;
 import tp1.impl.servers.common.JavaFiles;
 import tp1.impl.dropbox.CreateFolderV2Args;
 
@@ -41,7 +44,7 @@ public class JavaFilesDropBox implements Files {
 
     private static final String apiKey = "ki9t63870k4ifvy";
     private static final String apiSecret = "j3nbd4eccpdvlj8";
-    private static final String accessTokenStr = "sl.BI1IAZXCPQX41nZxabQgoz1HMFlY7nWYG9xWL0Rk78O_HF7VUjIBKnLp0fsfVBRRHVY4n98l-pzifR6IEyXOgEl3I3Niy0mGDd6QkCH0afjpvZMNJFvDelq8JSZIay7GMi3pUnei";
+    private static final String accessTokenStr = "sl.BI1GM8dDXAjIkqlYR1hbqBxXBWJq1i5E-md8peozLKjvQzXSxicmUxgIb0NDhddheQSM9KS8xeOfiXlBF80bJqmDonO3NHez0ihe_cIRYrn75dkTcGG4KID-iGKtHPczGR433wNS";
 
     private static final String CREATE_FOLDER_V2_URL = "https://api.dropboxapi.com/2/files/create_folder_v2";
 
@@ -64,6 +67,12 @@ public class JavaFilesDropBox implements Files {
     private final OAuth20Service service;
     private final OAuth2AccessToken accessToken;
 
+
+    private static final String FROM_BEGINNING = "earliest";
+    static final String KAFKA_BROKERS = "kafka:9092";
+    static final String TOPIC = "delete";
+
+
     public JavaFilesDropBox() {
         json = new Gson();
         accessToken = new OAuth2AccessToken(accessTokenStr);
@@ -75,6 +84,25 @@ public class JavaFilesDropBox implements Files {
         } catch (Exception e){
             e.printStackTrace();
         }
+
+        KafkaSubscriber subscriber = KafkaSubscriber.createSubscriber(KAFKA_BROKERS, List.of(TOPIC),
+                FROM_BEGINNING);
+
+        subscriber.start(false, new RecordProcessor() {
+
+            @Override
+            public void onReceive(ConsumerRecord<String, String> r) {
+                String value = r.value();
+
+                if(r.key().equalsIgnoreCase("deleteUserFiles")) {
+                    deleteUserFiles(value, "");
+                }else{
+                    if(getFile(value, "").isOK()){
+                        deleteFile(value, "");
+                    }
+                }
+            }
+        });
 
     }
 

@@ -94,7 +94,11 @@ public class JavaDirectory implements Directory {
 
                 //se for update do file e nao write
                 if (file.uri().size() == 2) {
-                    uri =  URI.create(file.uri().stream().toList().get(counter).replace(String.format("/files/%s$$$%s", userId, filename), ""));
+                    for (var uris : file.uri()) {
+                        getFileCounts(URI.create(uris), false).numFiles().decrementAndGet();
+                    }
+
+                    file.uri().clear();
                 }
                 
                 var result = FilesClients.get(uri).writeFile(fileId, data, Token.get());
@@ -105,6 +109,7 @@ public class JavaDirectory implements Directory {
                     info.setFileURL(String.format("%s/files/%s", uri, fileId));
 
                     files.put(fileId, file);
+
 
                     file.uri().add(String.format("%s/files/%s", uri, fileId));
 
@@ -290,6 +295,7 @@ public class JavaDirectory implements Directory {
                 removeSharesOfFile(file);
 
                 for (var uri : file.uri()) {
+
                     getFileCounts(URI.create(uri), false).numFiles().decrementAndGet();
                 }
 

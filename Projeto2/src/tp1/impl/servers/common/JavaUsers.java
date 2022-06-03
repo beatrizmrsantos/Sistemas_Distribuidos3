@@ -1,11 +1,8 @@
 package tp1.impl.servers.common;
 
+import static tp1.api.service.java.Result.ErrorCode.*;
 import static tp1.api.service.java.Result.error;
 import static tp1.api.service.java.Result.ok;
-import static tp1.api.service.java.Result.ErrorCode.BAD_REQUEST;
-import static tp1.api.service.java.Result.ErrorCode.CONFLICT;
-import static tp1.api.service.java.Result.ErrorCode.FORBIDDEN;
-import static tp1.api.service.java.Result.ErrorCode.NOT_FOUND;
 import static tp1.impl.clients.Clients.DirectoryClients;
 import static tp1.impl.clients.Clients.FilesClients;
 
@@ -18,11 +15,22 @@ import java.util.concurrent.Executors;
 import tp1.api.User;
 import tp1.api.service.java.Result;
 import tp1.api.service.java.Users;
+import tp1.impl.kafka.KafkaPublisher;
 import util.Token;
 
 public class JavaUsers implements Users {
 	final protected Map<String, User> users = new ConcurrentHashMap<>();
 	final ExecutorService executor = Executors.newCachedThreadPool();
+
+	static final String TOPIC = "delete";
+	//static final String KAFKA_BROKERS = "localhost:9092"; // For testing locally
+	static final String KAFKA_BROKERS = "kafka:9092";
+
+	final KafkaPublisher publisher;
+
+	public JavaUsers() {
+		this.publisher = KafkaPublisher.createPublisher(KAFKA_BROKERS);
+	}
 	
 	@Override
 	public Result<String> createUser(User user) {
@@ -84,8 +92,10 @@ public class JavaUsers implements Users {
 			users.remove(userId);
 			executor.execute(()->{
 				DirectoryClients.get().deleteUserFiles(userId, password, Token.get());
-				for( var uri : FilesClients.all())
-					FilesClients.get(uri).deleteUserFiles( userId, password);
+				for( var uri : FilesClients.all()) {
+					publisher.publish(TOPIC,"deleteUserFiles",userId);
+					//FilesClients.get(uri).deleteUserFiles( userId, password);
+				}
 			});
 			return ok(user);
 		}
