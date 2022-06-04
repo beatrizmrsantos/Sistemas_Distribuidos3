@@ -11,9 +11,7 @@ public class Token {
 
         String value = totaltime + DELIMITER + id;
 
-        String secret = GetSecret.get(name);
-
-        return Hash.of(value + DELIMITER + secret) + DELIMITER + value;
+        return Hash.of(value + DELIMITER + GetSecret.get(name)) + DELIMITER + value;
     }
 
 
@@ -27,10 +25,7 @@ public class Token {
 
         if(!idGiven.equals(id)) return false;
 
-        String secret = GetSecret.get(name);
-
-        String newHash = Hash.of(totaltime + DELIMITER + id + DELIMITER + secret);
-
+        String newHash = Hash.of(totaltime + DELIMITER + id + DELIMITER + GetSecret.get(name));
         if(!hash.equals(newHash)) return false;
 
         return true;
