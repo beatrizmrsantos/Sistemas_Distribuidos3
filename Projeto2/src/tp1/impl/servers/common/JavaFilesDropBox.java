@@ -31,9 +31,9 @@ import tp1.impl.dropbox.ListFolderContinueArgs;
 import tp1.impl.dropbox.ListFolderReturn;
 import tp1.impl.dropbox.UploadFileArg;
 import util.IO;
+import util.Token;
 
-import static tp1.api.service.java.Result.ErrorCode.INTERNAL_ERROR;
-import static tp1.api.service.java.Result.ErrorCode.NOT_FOUND;
+import static tp1.api.service.java.Result.ErrorCode.*;
 import static tp1.api.service.java.Result.error;
 import static tp1.api.service.java.Result.ok;
 
@@ -44,7 +44,7 @@ public class JavaFilesDropBox implements Files {
 
     private static final String apiKey = "ki9t63870k4ifvy";
     private static final String apiSecret = "j3nbd4eccpdvlj8";
-    private static final String accessTokenStr = "sl.BI1GM8dDXAjIkqlYR1hbqBxXBWJq1i5E-md8peozLKjvQzXSxicmUxgIb0NDhddheQSM9KS8xeOfiXlBF80bJqmDonO3NHez0ihe_cIRYrn75dkTcGG4KID-iGKtHPczGR433wNS";
+    private static final String accessTokenStr = "sl.BI7vNk1CSLQxFW55Nx8bsAa1Sc78A31xsm_Mtgs1txzGh-OpZYWoADk7FjMWF6PpcXgOW79I4SwLRxl60yTYWNpmixKAAWpKOymJW8eKGZNRrdCfFdvDq6OVwCZQGOnksSZnkheG";
 
     private static final String CREATE_FOLDER_V2_URL = "https://api.dropboxapi.com/2/files/create_folder_v2";
 
@@ -109,6 +109,10 @@ public class JavaFilesDropBox implements Files {
 
     @Override
     public Result<byte[]> getFile(String fileId, String token) {
+        if(!Token.matches(token, "FILES_EXTRA_ARGS")){
+            return error(BAD_REQUEST);
+        }
+
         fileId = fileId.replace( DELIMITER, "/");
 
         try{
@@ -122,6 +126,10 @@ public class JavaFilesDropBox implements Files {
 
     @Override
     public Result<Void> deleteFile(String fileId, String token) {
+        if(!Token.matches(token, "FILES_EXTRA_ARGS")){
+            return error(BAD_REQUEST);
+        }
+
         String path = "/tmpDropBox";
 
         if(!fileId.equalsIgnoreCase("")) {
@@ -140,6 +148,10 @@ public class JavaFilesDropBox implements Files {
 
     @Override
     public Result<Void> writeFile(String fileId, byte[] data, String token) {
+        if(!Token.matches(token, "FILES_EXTRA_ARGS")){
+            return error(BAD_REQUEST);
+        }
+
         fileId = fileId.replace( DELIMITER, "/");
 
         try{
@@ -154,6 +166,10 @@ public class JavaFilesDropBox implements Files {
 
     @Override
     public Result<Void> deleteUserFiles(String userId, String token) {
+        if(!Token.matches(token, "FILES_EXTRA_ARGS")){
+            return error(BAD_REQUEST);
+        }
+
         userId = userId.concat(ROOT + userId);
 
         try{

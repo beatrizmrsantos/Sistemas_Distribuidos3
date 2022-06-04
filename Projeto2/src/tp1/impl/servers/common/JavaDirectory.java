@@ -90,6 +90,8 @@ public class JavaDirectory implements Directory {
 
             var counter = 0;
 
+            String token = Token.set(System.currentTimeMillis(),fileId,"DIR_EXTRA_ARGS");
+
             for (var uri : orderCandidateFileServers(file)) {
 
                 //se for update do file e nao write
@@ -101,7 +103,7 @@ public class JavaDirectory implements Directory {
                     file.uri().clear();
                 }
                 
-                var result = FilesClients.get(uri).writeFile(fileId, data, Token.get());
+                var result = FilesClients.get(uri).writeFile(fileId, data,token);
 
                 if (result.isOK()) {
                     info.setOwner(userId);
@@ -164,7 +166,9 @@ public class JavaDirectory implements Directory {
 
         }
 
-        long offset = publisher.publish(TOPIC, fileId);
+        String token = Token.set(System.currentTimeMillis(),fileId,"DIR_EXTRA_ARGS");
+
+        long offset = publisher.publish(TOPIC, fileId + "#"+ token);
         if (offset < 0)
             return error(INTERNAL_ERROR);
 
@@ -245,8 +249,9 @@ public class JavaDirectory implements Directory {
             }
         }
 
+        String token = Token.set(System.currentTimeMillis(),fileId,"DIR_EXTRA_ARGS");
 
-        return redirect(uris);
+        return redirect(uris +"?token=" + token);
     }
 
     @Override
