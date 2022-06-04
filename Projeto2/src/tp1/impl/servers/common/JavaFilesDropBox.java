@@ -92,13 +92,15 @@ public class JavaFilesDropBox implements Files {
 
             @Override
             public void onReceive(ConsumerRecord<String, String> r) {
-                String value = r.value();
+                String[] value = r.value().split("#");
+                String id = value[0];
+                String token = value[1];
 
-                if(r.key().equalsIgnoreCase("deleteUserFiles")) {
-                    deleteUserFiles(value, "");
-                }else{
-                    if(getFile(value, "").isOK()){
-                        deleteFile(value, "");
+                if (r.key().equalsIgnoreCase("deleteUserFiles")) {
+                    deleteUserFiles(id, token);
+                } else {
+                    if (getFile(id, token).isOK()) {
+                        deleteFile(id, token);
                     }
                 }
             }

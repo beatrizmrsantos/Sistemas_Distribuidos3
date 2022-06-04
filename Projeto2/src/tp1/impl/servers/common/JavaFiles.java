@@ -38,7 +38,7 @@ public class JavaFiles implements Files {
 
             @Override
             public void onReceive(ConsumerRecord<String, String> r) {
-                String[] value = String.format(r.value()).split("#");
+                String[] value = r.value().split("#");
                 String id = value[0];
                 String token = value[1];
 

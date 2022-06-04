@@ -12,6 +12,7 @@ import tp1.api.service.java.Result.ErrorCode;
 import tp1.api.service.rest.RestDirectory;
 import tp1.impl.kafka.sync.SyncPoint;
 import tp1.impl.servers.common.JavaDirectory;
+import util.Token;
 
 @Singleton
 public class DirectoryResources extends RestResource implements RestDirectory {
@@ -64,8 +65,10 @@ public class DirectoryResources extends RestResource implements RestDirectory {
 		var res = impl.getFile(filename, userId, accUserId, password);
 		if (res.error() == ErrorCode.REDIRECT) {
 			String location = res.errorValue();
-			if (!location.contains(REST))
-				res = FilesClients.get(location).getFile(JavaDirectory.fileId(filename, userId), password);
+			if (!location.contains(REST)){
+				String token = Token.set(System.currentTimeMillis(), JavaDirectory.fileId(filename, userId),"DIR_EXTRA_ARGS");
+				res = FilesClients.get(location).getFile(JavaDirectory.fileId(filename, userId), token);
+			}
 		}
 		return super.resultOrThrow(res);
 

@@ -17,7 +17,7 @@ public class Token {
     }
 
     public static boolean matches(long currentTime, String t, String name) {
-        String[] s = String.format(t).split(DELIMITER);
+        String[] s = t.split(DELIMITER);
         String hash = s[0];
         long totaltime = Long.parseLong(s[1]);
         String id = s[2];
