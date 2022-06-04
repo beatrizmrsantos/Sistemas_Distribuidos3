@@ -109,7 +109,7 @@ public class JavaFilesDropBox implements Files {
 
     @Override
     public Result<byte[]> getFile(String fileId, String token) {
-        if(!Token.matches(token, "FILES_EXTRA_ARGS")){
+        if(!Token.matches(System.currentTimeMillis(), token, "FILES_EXTRA_ARGS")){
             return error(BAD_REQUEST);
         }
 
@@ -126,7 +126,7 @@ public class JavaFilesDropBox implements Files {
 
     @Override
     public Result<Void> deleteFile(String fileId, String token) {
-        if(!Token.matches(token, "FILES_EXTRA_ARGS")){
+        if(!Token.matches(System.currentTimeMillis(), token, "FILES_EXTRA_ARGS")){
             return error(BAD_REQUEST);
         }
 
@@ -148,7 +148,7 @@ public class JavaFilesDropBox implements Files {
 
     @Override
     public Result<Void> writeFile(String fileId, byte[] data, String token) {
-        if(!Token.matches(token, "FILES_EXTRA_ARGS")){
+        if(!Token.matches(System.currentTimeMillis(), token, "FILES_EXTRA_ARGS")){
             return error(BAD_REQUEST);
         }
 
@@ -166,7 +166,7 @@ public class JavaFilesDropBox implements Files {
 
     @Override
     public Result<Void> deleteUserFiles(String userId, String token) {
-        if(!Token.matches(token, "FILES_EXTRA_ARGS")){
+        if(!Token.matches(System.currentTimeMillis(), token, "FILES_EXTRA_ARGS")){
             return error(BAD_REQUEST);
         }
 

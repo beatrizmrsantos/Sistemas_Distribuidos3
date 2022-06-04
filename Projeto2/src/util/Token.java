@@ -16,25 +16,22 @@ public class Token {
         return Hash.of(value + DELIMITER + secret) + DELIMITER + value;
     }
 
-    public static boolean matches(String t, String name) {
+    public static boolean matches(long currentTime, String t, String name) {
         String[] s = String.format(t).split(DELIMITER);
         String hash = s[0];
         long totaltime = Long.parseLong(s[1]);
         String id = s[2];
 
-        if (totaltime < System.currentTimeMillis()) {
-            return false;
-        }
+        if (totaltime < currentTime) return false;
+
 
         String secret = GetSecret.get(name);
 
         String newHash = Hash.of(totaltime + DELIMITER + id + DELIMITER + secret);
 
+        if(!hash.equals(newHash)) return false;
 
-        if(hash.equals(newHash)){
-            return true;
-        }
-        return false;
+        return true;
 
     }
 }
