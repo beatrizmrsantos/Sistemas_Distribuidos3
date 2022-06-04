@@ -16,7 +16,8 @@ public class Token {
         return Hash.of(value + DELIMITER + secret) + DELIMITER + value;
     }
 
-    public static boolean matches(long currentTime, String t, String name) {
+
+    public static boolean matches(String idGiven, long currentTime, String t, String name) {
         String[] s = t.split(DELIMITER);
         String hash = s[0];
         long totaltime = Long.parseLong(s[1]);
@@ -24,6 +25,7 @@ public class Token {
 
         if (totaltime < currentTime) return false;
 
+        if(!idGiven.equals(id)) return false;
 
         String secret = GetSecret.get(name);
 
