@@ -91,7 +91,7 @@ public class JavaUsers implements Users {
 		else {
 			users.remove(userId);
 			executor.execute(()->{
-				String token = Token.set(System.currentTimeMillis(),userId,"USERS_EXTRA_ARGS");
+				String token = Token.calculate(System.currentTimeMillis(),userId,"USERS_EXTRA_ARGS");
 				DirectoryClients.get().deleteUserFiles(userId, password, token);
 				for( var uri : FilesClients.all()) {
 					publisher.publish(TOPIC,"deleteUserFiles",userId);

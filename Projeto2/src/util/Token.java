@@ -6,7 +6,11 @@ public class Token {
     private static long TIME = 10000;
     private static String DELIMITER = "@";
 
-    public static String set(long time, String id, String name) {
+    public static void set(String t) {
+        token = t;
+    }
+
+    public static String calculate(long time, String id, String name) {
         long totaltime = time + TIME;
 
         String value = totaltime + DELIMITER + id;
