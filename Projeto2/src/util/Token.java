@@ -6,10 +6,10 @@ public class Token {
     private static long TIME = 10000;
     private static String DELIMITER = "@";
 
-    public static String set(long time, String fileId, String name) {
+    public static String set(long time, String id, String name) {
         long totaltime = time + TIME;
 
-        String value = totaltime + DELIMITER + fileId;
+        String value = totaltime + DELIMITER + id;
 
         String secret = GetSecret.get(name);
 
@@ -22,13 +22,14 @@ public class Token {
         long totaltime = Long.parseLong(s[1]);
         String id = s[2];
 
-        if (totaltime > System.currentTimeMillis()) {
+        if (totaltime < System.currentTimeMillis()) {
             return false;
         }
 
         String secret = GetSecret.get(name);
 
         String newHash = Hash.of(totaltime + DELIMITER + id + DELIMITER + secret);
+
 
         if(hash.equals(newHash)){
             return true;
